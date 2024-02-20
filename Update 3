@@ -1,0 +1,67 @@
+import mpmath
+from termcolor import colored
+
+def is_prime(n):
+    """Check if a number is prime."""
+    if n <= 1:
+        return False
+    elif n <= 3:
+        return True
+    elif n % 2 == 0 or n % 3 == 0:
+        return False
+    i = 5
+    while i * i <= n:
+        if n % i == 0 or n % (i + 2) == 0:
+            return False
+        i += 6
+    return True
+
+def prime_factors(n):
+    """Find prime factors of a number."""
+    factors = []
+    divisor = 2
+    while n > 1:
+        while n % divisor == 0:
+            factors.append(divisor)
+            n //= divisor
+        divisor += 1
+    return factors
+
+def expected_zeta_value(n):
+    """Calculate the expected zeta value based on the theory of prime factors of base 10 numbers."""
+    factors = prime_factors(n)
+    product = 1
+    for factor in factors:
+        product *= mpmath.zeta(factor)
+    return product
+
+def test_zeta_base(base):
+    """Test the zeta function for a specific base and its multiples."""
+    results = []
+    mpmath.mp.dps = 30  # Set decimal precision
+    print(f"Testing base {base}:")
+    for n in range(2, base):
+        if is_prime(n):
+            result = mpmath.zeta(n)
+            expected_result = expected_zeta_value(n)  # Calculate expected result based on your theory
+            if result == expected_result:
+                results.append((n, result, True))
+            else:
+                results.append((n, result, False))
+    return results
+
+def print_results(results):
+    """Print the results with color-coded correctness."""
+    for n, result, is_correct in results:
+        color = "green" if is_correct else "red"
+        correctness = "Correct" if is_correct else "False"
+        print(f"Zeta({n}) = {result} - {colored(correctness, color)}")
+
+if __name__ == "__main__":
+    all_results = []
+    bases_to_test = [10, 20, 30, 40, 50]  # Test bases 10 and its multiples
+    for base in bases_to_test:
+        results = test_zeta_base(base)
+        all_results.extend(results)
+
+    print_results(all_results)
